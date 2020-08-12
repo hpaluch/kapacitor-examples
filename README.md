@@ -28,7 +28,7 @@ systemctl kill -s SIGHUP kapacitor
 
 # List of examples
 
-- [tasks/cpu_alert_batch.tick](../../../blob/master/tasks/cpu_alert_batch.tick)
+- [tasks/cpu_alert_batch.tick](../../blob/master/tasks/cpu_alert_batch.tick)
   - heavily annotated stock CPU usage example in BATCH mode. Reading this example it should
     become clear what is exactly `.period()` and `.every()` etc...
 
