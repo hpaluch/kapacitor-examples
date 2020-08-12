@@ -1,0 +1,22 @@
+//
+// Kapacitor CPU batch example - an attempt to understand it
+//
+dbrp "telegraf"."autogen"
+
+batch
+    // example of real query send to InfluxDB
+    // =SELECT mean(usage_idle) AS usage_idle FROM telegraf.autogen.cpu WHERE cpu = 'cpu-total' AND time >= '2020-08-12T16:38:03.041852708Z' AND time < '2020-08-12T16:41:03.041852708Z' GROUP BY time(1m, 0s), cpu, host
+    |query('''
+        SELECT mean(usage_idle) as usage_idle
+        FROM "telegraf"."autogen"."cpu"
+	WHERE cpu='cpu-total'
+    ''')
+        .period(3m) // period => time range injected into WHERE
+        .every(1m)  // every  => how often is query executed
+        .groupBy(time(1m), 'cpu', 'host') // => will inject GROUP BY ...
+    |eval(lambda: 100.0 - "usage_idle").as('util_pct') // new field 'util_pct' - utilization % 
+    |log().prefix('xxx6-groupBy') // use fgrep xxx6-groupBy /var/log/kapacitor/kapacitor.log #for debug
+    |alert()
+        .crit(lambda: "util_pct" > 30)
+        .log('/tmp/cpu_alert_batch-alerts.log')
+
